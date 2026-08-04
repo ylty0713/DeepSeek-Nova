@@ -1,0 +1,40 @@
+# Local credentials and environment overrides
+.deepseek.env
+.env
+.env.*
+!.deepseek.env.example
+
+# Dependencies
+node_modules/
+desktop/node_modules/
+
+# Build and packaging output
+desktop/release/
+desktop/build/asar-*/
+desktop/build/ui-smoke-*/
+desktop/build/*.asar
+desktop/build/*-check.png
+desktop/build/ui-*.png
+*.blockmap
+
+# Logs, caches, and operating-system files
+*.log
+*.tmp
+*.bak
+.cache/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop/.electron-builder-cache/
+
+# Local task data and generated previews
+web_images/
+web_videos/
+restored-source/
+desktop/page_*.png
+desktop/page_*.jpg
+desktop/page_*.txt
+
+# Large debugging artifacts not needed to build the app
+*.map

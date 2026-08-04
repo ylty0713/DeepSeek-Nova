@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: http://127.0.0.1:*; media-src 'self' data: blob: http://127.0.0.1:*; connect-src 'self' http://127.0.0.1:*; frame-src https: http: data: blob:;"
+    />
+    <title>DeepSeek Nova</title>
+    <link rel="stylesheet" href="../node_modules/@fontsource-variable/inter/index.css" />
+    <link rel="stylesheet" href="../node_modules/@fontsource-variable/noto-sans-sc/index.css" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="titlebar">
+      <div class="titlebar-brand"><img class="titlebar-logo" src="assets/deepseek-nova-logo-mark.svg" alt="" /><span>DeepSeek Nova</span></div>
+      <div class="titlebar-context" id="titlebarContext">本地工作台</div>
+    </div>
+
+    <div class="app-layout" id="appLayout">
+      <aside class="left-sidebar" id="leftSidebar">
+        <div class="sidebar-head">
+          <button class="primary-action" id="newTaskButton"><span data-icon="plus"></span><span data-i18n="newTask">新建任务</span></button>
+          <button class="icon-btn" id="collapseLeft" title="收起会话栏" aria-label="收起会话栏"><span data-icon="panel-left-close"></span></button>
+        </div>
+
+        <div class="search-wrap">
+          <span class="search-icon" data-icon="search"></span>
+          <input id="sessionSearch" type="search" placeholder="搜索会话" data-i18n-placeholder="searchSessions" />
+          <kbd>Ctrl K</kbd>
+        </div>
+
+        <nav class="history-nav" aria-label="会话分类">
+          <button class="history-tab active" data-view="active"><span data-icon="chat"></span><span data-i18n="sessions">会话</span><b id="activeCount">0</b></button>
+          <button class="history-tab" data-view="archived"><span data-icon="archive"></span><span data-i18n="archived">已归档</span><b id="archiveCount">0</b></button>
+        </nav>
+
+        <div class="session-list" id="sessionList"></div>
+
+        <div class="sidebar-bottom">
+          <button class="workspace-card" id="workspaceCard">
+            <span class="workspace-icon" data-icon="folder"></span>
+            <span class="workspace-copy">
+              <small data-i18n="currentWorkspace">当前工作区</small>
+              <strong id="workspaceName">package</strong>
+              <em id="workspacePath">正在读取…</em>
+            </span>
+            <span class="chevron" data-icon="chevron-right"></span>
+          </button>
+          <button class="settings-button" id="openSettings"><span data-icon="settings"></span><span data-i18n="settings">设置</span><kbd>Ctrl ,</kbd></button>
+        </div>
+      </aside>
+
+      <button class="collapsed-rail left-rail" id="expandLeft" title="展开会话栏" aria-label="展开会话栏"><span data-icon="panel-left-open"></span></button>
+      <div class="resize-handle left-resizer" id="leftResizer"></div>
+
+      <main class="main-workspace">
+        <header class="task-header">
+          <div class="task-heading">
+            <span class="task-status-dot" id="taskStatusDot"></span>
+            <div>
+              <h1 id="currentTaskTitle">新任务</h1>
+              <p id="currentTaskMeta">尚未开始 · 本地运行</p>
+            </div>
+          </div>
+          <div class="header-actions">
+            <button class="model-button" id="quickModelButton"><span id="headerModel">V4 Pro</span><small id="headerEffort">极致</small><i data-icon="chevron-down"></i></button>
+          </div>
+        </header>
+
+        <section class="conversation" id="conversation">
+          <div class="welcome" id="welcome">
+            <div class="welcome-visual" aria-hidden="true">
+              <img class="welcome-logo" id="welcomeLogo" data-src="assets/deepseek-nova-logo-animated.svg" alt="" />
+            </div>
+            <h2><span id="welcomeLead">你好，有什么需要随时告诉我。</span></h2>
+
+            <div class="starter-grid">
+              <button class="starter-card" data-starter="understand" data-prompt="分析当前项目，概括架构并指出最值得优先改进的部分。">
+                <span class="starter-icon orange" data-icon="code"></span><span><strong data-i18n="starterUnderstand">理解代码库</strong><small data-i18n="starterUnderstandHint">分析架构、依赖与入口</small></span><i data-icon="arrow-up-right"></i>
+              </button>
+              <button class="starter-card" data-starter="fix" data-prompt="检查当前项目的错误和潜在风险，修复能安全确认的问题。">
+                <span class="starter-icon green" data-icon="check"></span><span><strong data-i18n="starterFix">修复一个问题</strong><small data-i18n="starterFixHint">定位原因并验证修改</small></span><i data-icon="arrow-up-right"></i>
+              </button>
+              <button class="starter-card" data-starter="build" data-prompt="根据当前项目风格实现一个实用的新功能，并补充必要测试。">
+                <span class="starter-icon build-orange" data-icon="sparkles"></span><span><strong data-i18n="starterBuild">构建新功能</strong><small data-i18n="starterBuildHint">从需求到可运行代码</small></span><i data-icon="arrow-up-right"></i>
+              </button>
+            </div>
+          </div>
+          <div class="messages" id="messages"></div>
+        </section>
+
+        <section class="composer-zone">
+          <div class="composer-metrics" aria-label="当前会话 Token 用量">
+            <span class="token-counter-icon" data-icon="hash"></span>
+            <span data-i18n="used">已使用</span>
+            <span class="token-odometer" id="tokenOdometer" aria-live="off"><span class="token-digit"><span>0</span></span></span>
+            <span>Token</span>
+          </div>
+          <div class="attachment-strip" id="attachmentStrip"></div>
+          <div class="message-queue" id="messageQueue" aria-live="polite"></div>
+          <form class="composer" id="composer">
+            <textarea id="promptInput" rows="1" placeholder="交给 DeepSeek Nova 一个任务…" data-i18n-placeholder="promptPlaceholder"></textarea>
+            <div class="composer-toolbar">
+              <div class="composer-tools">
+                <button type="button" class="tool-button" id="attachButton" title="添加文件"><span data-icon="paperclip"></span><span data-i18n="addFiles">添加文件</span></button>
+                <button type="button" class="tool-button" id="composerWorkspace"><span data-icon="folder"></span><span id="composerWorkspaceName">package</span></button>
+              </div>
+              <div class="composer-submit">
+                <div class="permission-picker">
+                  <button type="button" class="mode-button" id="modeButton" aria-haspopup="menu" aria-expanded="false" title="选择审批模式">
+                    <span data-icon="shield-check"></span><span id="modeLabel">规划模式</span><span class="mode-chevron" data-icon="chevron-down"></span>
+                  </button>
+                  <div class="permission-menu" id="permissionMenu" role="menu" hidden>
+                    <button type="button" role="menuitemradio" data-permission-mode="plan"><span class="permission-menu-icon" data-icon="eye"></span><span><strong>规划模式</strong><small>只分析与规划，不执行修改</small></span><i data-icon="check"></i></button>
+                    <button type="button" role="menuitemradio" data-permission-mode="default"><span class="permission-menu-icon" data-icon="help"></span><span><strong>审批时询问</strong><small>需要权限时由你确认</small></span><i data-icon="check"></i></button>
+                    <button type="button" role="menuitemradio" data-permission-mode="acceptEdits"><span class="permission-menu-icon" data-icon="edit"></span><span><strong>自动编辑</strong><small>文件修改自动通过，其他操作询问</small></span><i data-icon="check"></i></button>
+                    <button type="button" role="menuitemradio" data-permission-mode="bypassPermissions"><span class="permission-menu-icon" data-icon="zap"></span><span><strong>完全访问</strong><small>后台默认允许，不再弹出审批提示</small></span><i data-icon="check"></i></button>
+                  </div>
+                </div>
+                <button class="send-button" id="sendButton" type="submit" aria-label="发送"><span data-icon="arrow-up"></span></button>
+              </div>
+            </div>
+          </form>
+          <p class="composer-note" data-i18n="composerNote">Enter 发送 · Shift + Enter 换行 · Esc 停止任务</p>
+        </section>
+      </main>
+
+      <div class="resize-handle right-resizer" id="rightResizer"></div>
+      <button class="collapsed-rail right-rail" id="expandRight" title="展开检查器" aria-label="展开检查器"><span data-icon="panel-right-open"></span></button>
+
+      <aside class="right-sidebar" id="rightSidebar">
+        <div class="inspector-tabs">
+          <button class="inspector-tab active" data-panel="activity"><span data-icon="activity"></span><span data-i18n="activity">进程</span></button>
+          <button class="inspector-tab" data-panel="files"><span data-icon="file"></span><span data-i18n="files">文件</span></button>
+          <button class="inspector-tab" data-panel="browser"><span data-icon="globe"></span><span data-i18n="browser">浏览器</span></button>
+          <button class="icon-btn inspector-close" id="collapseRight" title="收起检查器" aria-label="收起检查器"><span data-icon="panel-right-close"></span></button>
+        </div>
+
+        <section class="inspector-panel active" id="activityPanel">
+          <div class="panel-heading">
+            <div><h3 data-i18n="taskActivity">任务进程</h3></div>
+            <span class="live-pill" id="livePill"><i></i> 待命</span>
+          </div>
+          <div class="activity-timeline" id="activityTimeline">
+            <div class="empty-inspector"><span data-icon="activity"></span><strong>还没有运行记录</strong><p>发送任务后，这里会显示代理进程、输出和文件变更。</p></div>
+          </div>
+        </section>
+
+        <section class="inspector-panel" id="filesPanel">
+          <div class="files-toolbar">
+            <div><h3 id="filesRootName">文件</h3></div>
+            <div><button class="icon-btn" id="refreshFiles" title="刷新文件"><span data-icon="refresh"></span></button><button class="icon-btn" id="revealWorkspace" title="在文件夹中显示"><span data-icon="folder-open"></span></button></div>
+          </div>
+          <div class="file-browser">
+            <div class="file-tree" id="fileTree"></div>
+            <div class="file-panel-resizer" id="filePanelResizer" role="separator" aria-orientation="horizontal" aria-label="调整文件列表和预览区域高度" tabindex="0"><span></span></div>
+            <div class="preview-pane" id="previewPane">
+              <div class="preview-empty"><span data-icon="file"></span><strong data-i18n="selectFilePreview">选择文件进行预览</strong><p data-i18n="filePreviewHint">单击预览，双击用本地应用打开。</p></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="inspector-panel browser-panel" id="browserPanel">
+          <div class="browser-toolbar">
+            <button class="icon-btn" id="browserBack" title="后退"><span data-icon="arrow-left"></span></button>
+            <button class="icon-btn" id="browserForward" title="前进"><span data-icon="arrow-right"></span></button>
+            <button class="icon-btn" id="browserReload" title="刷新"><span data-icon="refresh"></span></button>
+            <div class="browser-address"><span data-icon="globe"></span><span class="browser-preview-badge" id="browserPreviewBadge" hidden>本地预览</span><input id="browserUrl" value="https://www.bing.com" aria-label="浏览器地址" /></div>
+            <button class="icon-btn" id="browserExternal" title="在默认浏览器打开"><span data-icon="external"></span></button>
+          </div>
+          <div class="browser-load-status" id="browserLoadStatus" hidden><span data-icon="refresh"></span><span>正在更新预览</span></div>
+          <webview id="browserView" src="https://www.bing.com" partition="persist:deepseek-nova-browser"></webview>
+        </section>
+      </aside>
+    </div>
+
+    <div class="modal-backdrop" id="settingsModal" hidden>
+      <section class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+        <aside class="settings-nav">
+          <div class="settings-title"><img class="settings-brand-logo" src="assets/deepseek-nova-logo-mark.svg" alt="" /><div><strong id="settingsTitle" data-i18n="settings">设置</strong><small>DeepSeek Nova</small></div></div>
+          <button class="settings-nav-item active" data-settings="general"><span data-icon="sliders"></span><span data-i18n="general">常规</span></button>
+          <button class="settings-nav-item" data-settings="model"><span data-icon="brain"></span><span data-i18n="modelReasoning">模型与推理</span></button>
+          <button class="settings-nav-item" data-settings="skills"><span data-icon="sparkles"></span><span data-i18n="skillManagement">Skill 管理</span></button>
+          <button class="settings-nav-item" data-settings="appearance"><span data-icon="palette"></span><span data-i18n="appearance">外观</span></button>
+          <div class="settings-spacer"></div>
+          <p class="settings-version" id="settingsVersion">DeepSeek Nova 2.1.88</p>
+        </aside>
+
+        <div class="settings-content">
+          <header><div><h2 id="settingsPanelTitle">常规</h2><p id="settingsPanelSubtitle">工作区、密钥和执行权限</p></div><button class="icon-btn" id="closeSettings" aria-label="关闭设置"><span data-icon="close"></span></button></header>
+
+          <div class="settings-pane active" data-pane="general">
+            <section class="setting-group">
+              <div class="setting-copy"><strong>DeepSeek API Key</strong><p data-i18n="apiKeyDescription">使用 Windows 安全存储加密保存在本机。</p></div>
+              <div class="setting-control key-control"><input id="settingsApiKey" type="password" placeholder="保持现有密钥不变" /><button id="toggleSettingsKey">显示</button></div>
+            </section>
+            <section class="setting-group vertical token-quota-group">
+              <div class="setting-copy"><strong data-i18n="accountQuota">账户额度</strong><p data-i18n="accountQuotaDescription">通过 DeepSeek 官方接口查询账户当前可用余额。</p></div>
+              <div class="token-quota-panel" id="tokenQuotaPanel">
+                <div class="token-quota-head">
+                  <span class="token-quota-icon" data-icon="wallet"></span>
+                  <div><strong id="tokenQuotaStatus" data-i18n="quotaNotChecked">尚未查询</strong><small id="tokenQuotaCheckedAt" data-i18n="quotaCheckHint">点击右侧按钮获取最新额度</small></div>
+                  <button class="quota-refresh-button" id="refreshTokenQuota"><span data-icon="refresh"></span><span data-i18n="viewQuota">查看额度</span></button>
+                </div>
+                <div class="token-quota-list" id="tokenQuotaList"></div>
+                <p class="quota-note" data-i18n="quotaNote">显示 DeepSeek 官方返回的总余额、充值余额和赠金额度。</p>
+              </div>
+            </section>
+            <section class="setting-group vertical">
+              <div class="setting-copy"><strong data-i18n="defaultWorkspace">默认工作区</strong><p data-i18n="defaultWorkspaceDescription">新会话将在这个目录中运行。</p></div>
+              <div class="path-control"><input id="settingsWorkspace" readonly /><button id="chooseWorkspace" data-i18n="choose">选择…</button></div>
+            </section>
+            <section class="setting-group">
+              <div class="setting-copy"><strong data-i18n="executionMode">执行模式</strong><p data-i18n="executionModeDescription">控制代理是否可以直接修改工作区。</p></div>
+              <select id="settingsPermission">
+                <option value="plan">规划模式 · 只读</option>
+                <option value="default">默认模式</option>
+                <option value="acceptEdits">自动接受编辑</option>
+                <option value="bypassPermissions">完全访问 · 后台默认允许</option>
+              </select>
+            </section>
+            <section class="setting-group">
+              <div class="setting-copy"><strong data-i18n="languageTitle">系统语言</strong><p data-i18n="languageDescription">选择客户端界面使用的语言。</p></div>
+              <select id="settingsLanguage">
+                <option value="zh-CN">简体中文</option>
+                <option value="en-US">English</option>
+              </select>
+            </section>
+          </div>
+
+          <div class="settings-pane" data-pane="model">
+            <section class="setting-group vertical">
+              <div class="setting-copy"><strong data-i18n="primaryModel">主模型</strong><p data-i18n="primaryModelDescription">处理对话、规划和复杂编码任务。</p></div>
+              <input id="settingsModel" type="text" />
+            </section>
+            <section class="setting-group vertical">
+              <div class="setting-copy"><strong data-i18n="fastModel">快速模型</strong><p data-i18n="fastModelDescription">用于轻量任务和子代理。</p></div>
+              <input id="settingsFlashModel" type="text" />
+            </section>
+            <section class="setting-group vertical">
+              <div class="setting-copy"><strong data-i18n="reasoningEffort">推理强度</strong><p data-i18n="reasoningEffortDescription">更高强度通常会花费更多时间与 Token。</p></div>
+              <div class="effort-options" id="settingsEffort">
+                <button data-effort="low">低<small>更快</small></button>
+                <button data-effort="medium">中<small>均衡</small></button>
+                <button data-effort="high">高<small>深入</small></button>
+                <button data-effort="max">极致<small>最强</small></button>
+              </div>
+            </section>
+          </div>
+
+          <div class="settings-pane" data-pane="skills">
+            <div class="skills-summary"><div><strong id="skillsEnabledCount">0</strong><span data-i18n="enabled">已启用</span></div><p data-i18n="skillsDescription">管理代理可使用的本地 Skill。设置会应用到之后创建的任务。</p></div>
+            <div class="skills-search"><span data-icon="search"></span><input id="skillsSearch" placeholder="搜索 Skill" data-i18n-placeholder="searchSkills" /></div>
+            <div class="skills-list" id="skillsList"></div>
+          </div>
+
+          <div class="settings-pane" data-pane="appearance">
+            <section class="setting-group vertical">
+              <div class="setting-copy"><strong data-i18n="theme">主题</strong><p data-i18n="themeDescription">选择工作台的颜色外观。</p></div>
+              <div class="theme-options" id="themeOptions">
+                <button data-theme="light"><span class="theme-preview light-preview"><i></i><b></b></span><strong>浅色</strong></button>
+                <button data-theme="dark"><span class="theme-preview dark-preview"><i></i><b></b></span><strong>深色</strong></button>
+                <button data-theme="system"><span class="theme-preview system-preview"><i></i><b></b></span><strong>跟随系统</strong></button>
+              </div>
+            </section>
+            <section class="setting-group">
+              <div class="setting-copy"><strong data-i18n="interfaceDensity">界面密度</strong><p data-i18n="interfaceDensityDescription">调整列表和控件之间的空间。</p></div>
+              <select id="settingsDensity"><option value="comfortable">舒适</option><option value="compact">紧凑</option></select>
+            </section>
+          </div>
+
+          <footer class="settings-footer"><span id="settingsSaveStatus"></span><button class="secondary-button" id="cancelSettings" data-i18n="cancel">取消</button><button class="save-button" id="saveSettings" data-i18n="saveSettings">保存设置</button></footer>
+        </div>
+      </section>
+    </div>
+
+    <div class="confirm-backdrop" id="deleteConfirm" hidden>
+      <section class="confirm-card" role="alertdialog" aria-modal="true" aria-labelledby="deleteConfirmTitle">
+        <div class="confirm-icon" data-icon="warning"></div>
+        <div class="confirm-copy">
+          <h2 id="deleteConfirmTitle" data-i18n="deleteConversationTitle">删除这个会话？</h2>
+          <p id="deleteConfirmText" data-i18n="deleteConversationDescription">会话将从历史记录中移除，对应的 DeepSeek Nova 本地会话记录也会一并清理。此操作无法撤销。</p>
+        </div>
+        <div class="confirm-actions">
+          <button class="secondary-button" id="cancelDelete" data-i18n="cancel">取消</button>
+          <button class="danger-button" id="confirmDelete" data-i18n="deleteConversation">删除会话</button>
+        </div>
+      </section>
+    </div>
+
+    <div class="toast" id="toast" role="status"></div>
+    <script src="../node_modules/marked/lib/marked.umd.js"></script>
+    <script src="../node_modules/dompurify/dist/purify.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

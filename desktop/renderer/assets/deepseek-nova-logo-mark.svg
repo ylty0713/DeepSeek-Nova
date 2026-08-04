@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="650" height="650" viewBox="280 280 650 650"
+     role="img" aria-labelledby="title desc">
+  <title id="title">Nexus blue orbit mark</title>
+  <desc id="desc">The tightly cropped blue orbit mark used in the Nexus interface.</desc>
+  <defs>
+    <g id="three-circles">
+      <circle cx="606" cy="343" r="39"/>
+      <circle cx="560" cy="391" r="28"/>
+      <circle cx="531" cy="435" r="18"/>
+    </g>
+  </defs>
+  <g opacity="0.98">
+    <use xlink:href="#three-circles" href="#three-circles" fill="#3284F5" transform="rotate(0 606 604)"/>
+    <use xlink:href="#three-circles" href="#three-circles" fill="#1769F6" transform="rotate(30 606 604)"/>
+    <use xlink:href="#three-circles" href="#three-circles" fill="#0753F7" transform="rotate(60 606 604)"/>
+    <use xlink:href="#three-circles" href="#three-circles" fill="#063FF2" transform="rotate(90 606 604)"/>
+    <use xlink:href="#three-circles" href="#three-circles" fill="#153FEA" transform="rotate(120 606 604)"/>
+    <use xlink:href="#three-circles" href="#three-circles" fill="#2451E7" transform="rotate(150 606 604)"/>
+    <use xlink:href="#three-circles" href="#three-circles" fill="#4968E8" transform="rotate(180 606 604)"/>
+    <use xlink:href="#three-circles" href="#three-circles" fill="#738BE9" transform="rotate(210 606 604)"/>
+    <use xlink:href="#three-circles" href="#three-circles" fill="#96AFE9" transform="rotate(240 606 604)"/>
+    <use xlink:href="#three-circles" href="#three-circles" fill="#9EC8F0" transform="rotate(270 606 604)"/>
+    <use xlink:href="#three-circles" href="#three-circles" fill="#7FBAF1" transform="rotate(300 606 604)"/>
+    <use xlink:href="#three-circles" href="#three-circles" fill="#51A1F0" transform="rotate(330 606 604)"/>
+  </g>
+</svg>
